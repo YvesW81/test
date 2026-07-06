@@ -1,10 +1,6 @@
-# Laadpalen-monitor NL
 
-Logt automatisch de status van alle publieke laadpunten in Nederland via de
 open data van [NDW](https://opendata.ndw.nu/):
 
-- **snelladers (DC, ~6.400 punten)**: elk half uur
-- **reguliere palen (AC, ~161.000 punten)**: elk uur
 
 Draait via GitHub Actions (`.github/workflows/collect.yml`); elke run commit
 de nieuwe snapshots naar deze repo.
@@ -29,7 +25,3 @@ INOPERATIVE, REMOVED, UNKNOWN. Tijdstempels in bestandsnamen zijn UTC.
 - De repo groeit met ±14 MB per dag; archiveer/verplaats oude snapshots als
   dat na een paar maanden te veel wordt
 
-## Bron en licentie
-
-Data: NDW (Nationale Databank Wegverkeersgegevens), opendata.ndw.nu.
-Vermeld "bron: NDW" bij publicatie van analyses.
