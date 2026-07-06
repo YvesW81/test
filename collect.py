@@ -50,11 +50,20 @@ def log(msg: str) -> None:
         f.write(line + "\n")
 
 
-def download() -> list:
-    req = urllib.request.Request(URL, headers={"User-Agent": "laadpaal-monitor/1.0"})
-    with urllib.request.urlopen(req, timeout=120) as resp:
-        raw = resp.read()
-    return json.loads(gzip.decompress(raw))
+def download(attempts: int = 4, wait: int = 30) -> list:
+    """Download met herkansingen: tijdelijke netwerkfouten mogen een run
+    niet laten mislukken."""
+    for attempt in range(1, attempts + 1):
+        try:
+            req = urllib.request.Request(URL, headers={"User-Agent": "laadpaal-monitor/1.0"})
+            with urllib.request.urlopen(req, timeout=120) as resp:
+                raw = resp.read()
+            return json.loads(gzip.decompress(raw))
+        except Exception as e:
+            log(f"download poging {attempt}/{attempts} mislukt: {e!r}")
+            if attempt == attempts:
+                raise
+            time.sleep(wait)
 
 
 def newest_age(snap_dir: str) -> float:
