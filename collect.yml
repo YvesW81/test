@@ -17,20 +17,31 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+        with:
+          ref: main   # altijd de actuele stand, niet de (mogelijk verouderde) trigger-commit
 
       - name: Verzamel statussen
         run: python3 collect.py
 
       - name: Commit en push
+        if: always()
         run: |
           git config user.name "laadpalen-bot"
           git config user.email "actions@users.noreply.github.com"
           git add -A
           if git diff --cached --quiet; then
             echo "Niets te committen"
-          else
-            git commit -m "snapshot $(date -u +'%Y-%m-%d %H:%M') UTC"
-            git pull --rebase
-            git push
+            exit 0
           fi
+          git commit -m "snapshot $(date -u +'%Y-%m-%d %H:%M') UTC"
+          # Bij gelijktijdige runs conflicten automatisch oplossen in het
+          # voordeel van onze (nieuwste) bestanden; snapshots hebben unieke
+          # namen en botsen dus nooit.
+          for poging in 1 2 3; do
+            git push && exit 0
+            git pull --rebase -X theirs || git rebase --abort
+            sleep 10
+          done
+          echo "Push na 3 pogingen mislukt" >&2
+          exit 1
