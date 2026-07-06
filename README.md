@@ -1,5 +1,5 @@
 
-open data van [NDW](https://opendata.ndw.nu/):
+
 
 
 Draait via GitHub Actions (`.github/workflows/collect.yml`); elke run commit
