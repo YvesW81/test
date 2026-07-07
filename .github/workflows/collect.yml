@@ -2,46 +2,46 @@ name: Collect laadpaal-statussen
 
 on:
   schedule:
-    - cron: "*/30 * * * *"   # elk half uur (UTC, timing kan enkele minuten afwijken)
-  workflow_dispatch: {}       # handmatig starten via de Actions-tab
+    - cron: "7 * * * *"   # elk uur proberen te starten (minuut 7: minder drukte dan :00)
+  workflow_dispatch: {}
 
 permissions:
   contents: write
 
 concurrency:
   group: collect
-  cancel-in-progress: false
+  cancel-in-progress: false   # nooit 2 tegelijk; 1 wacht in de rij
 
 jobs:
   collect:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 170
     steps:
       - uses: actions/checkout@v5
         with:
-          ref: main   # altijd de actuele stand, niet de (mogelijk verouderde) trigger-commit
+          ref: main
 
-      - name: Verzamel statussen
-        run: python3 collect.py
-
-      - name: Commit en push
-        if: always()
+      - name: Verzamel statussen (6 metingen, elke 30 min)
         run: |
           git config user.name "laadpalen-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add -A
-          if git diff --cached --quiet; then
-            echo "Niets te committen"
-            exit 0
-          fi
-          git commit -m "snapshot $(date -u +'%Y-%m-%d %H:%M') UTC"
-          # Bij gelijktijdige runs conflicten automatisch oplossen in het
-          # voordeel van onze (nieuwste) bestanden; snapshots hebben unieke
-          # namen en botsen dus nooit.
-          for poging in 1 2 3; do
-            git push && exit 0
-            git pull --rebase -X theirs || git rebase --abort
-            sleep 10
+
+          push_changes() {
+            git add -A
+            git diff --cached --quiet && { echo "niets te committen"; return 0; }
+            git commit -m "snapshot $(date -u +'%Y-%m-%d %H:%M') UTC"
+            for p in 1 2 3; do
+              git push && return 0
+              git pull --rebase -X theirs || git rebase --abort
+              sleep 10
+            done
+            echo "push mislukt" >&2
+            return 1
+          }
+
+          for i in 1 2 3 4 5 6; do
+            echo "=== meting $i/6 om $(date -u +%H:%M) UTC ==="
+            python3 collect.py || echo "meting $i mislukt, door naar de volgende"
+            push_changes || true
+            [ "$i" -lt 6 ] && sleep 1740
           done
-          echo "Push na 3 pogingen mislukt" >&2
-          exit 1
