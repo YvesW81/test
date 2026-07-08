@@ -43,5 +43,6 @@ jobs:
             echo "=== meting $i/6 om $(date -u +%H:%M) UTC ==="
             python3 collect.py || echo "meting $i mislukt, door naar de volgende"
             push_changes || true
-            [ "$i" -lt 6 ] && sleep 1740
+           if [ "$i" -lt 6 ]; then sleep 1740; fi
           done
+          echo "Run compleet: alle metingen gedaan"
