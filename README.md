@@ -7,10 +7,10 @@ de nieuwe snapshots naar deze repo.
 
 ## Data
 
-- `snapshots_dc/status_YYYYMMDD_HHMM.csv.gz` — per snellaadpunt de status
-- `snapshots_ac/status_YYYYMMDD_HHMM.csv.gz` — per regulier laadpunt de status
+- `snapshots_dc/status_YYYYMMDD_HHMM.csv.gz` 
+- `snapshots_ac/status_YYYYMMDD_HHMM.csv.gz` — 
 - `locations.csv.gz` — referentie: locatie, adres, coördinaten, operator en
-  vermogen per laadpunt (wekelijks ververst)
+  
 - `collect.log` — logregel per run
 
 Statussen (OCPI): AVAILABLE, CHARGING, BLOCKED, RESERVED, OUTOFORDER,
@@ -18,7 +18,7 @@ INOPERATIVE, REMOVED, UNKNOWN. Tijdstempels in bestandsnamen zijn UTC.
 
 ## Beheer
 
-- Handmatig draaien: Actions-tab → "Collect laadpaal-statussen" → Run workflow
+- Handmatig draaien: Actions-tab → "" → Run workflow
 - Let op: GitHub schakelt scheduled workflows in publieke repo's uit na 60
   dagen zonder repo-activiteit; de bot-commits tellen doorgaans als activiteit,
   maar check af en toe de Actions-tab
