@@ -2,7 +2,7 @@ name: Collect laadpaal-statussen
 
 on:
   schedule:
-    - cron: "7 * * * *"   # elk uur proberen te starten (minuut 7: minder drukte dan :00)
+    - cron: "7,37 * * * *"   # elk uur proberen te starten (minuut 7: minder drukte dan :00)
   workflow_dispatch: {}
 
 permissions:
