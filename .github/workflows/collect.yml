@@ -2,7 +2,7 @@ name: Collect laadpaal-statussen
 
 on:
   schedule:
-    - cron: "7,37 * * * *"   # elk uur proberen te starten (minuut 7: minder drukte dan :00)
+    - cron: "7,37 * * * *"   # vangnet; de ketting hieronder doet het echte werk
   workflow_dispatch: {}
 
 permissions:
@@ -43,6 +43,16 @@ jobs:
             echo "=== meting $i/6 om $(date -u +%H:%M) UTC ==="
             python3 collect.py || echo "meting $i mislukt, door naar de volgende"
             push_changes || true
-           if [ "$i" -lt 6 ]; then sleep 1740; fi
+            if [ "$i" -lt 6 ]; then sleep 1740; fi
           done
           echo "Run compleet: alle metingen gedaan"
+
+      - name: Start volgende run (ketting)
+        if: always()
+        run: |
+          curl -sf -X POST \
+            -H "Authorization: Bearer ${{ secrets.WORKFLOW_PAT }}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows/collect.yml/dispatches \
+            -d '{"ref":"main"}' \
+          && echo "volgende run aangevraagd" || echo "ketting-trigger mislukt; cron-vangnet neemt het over"
